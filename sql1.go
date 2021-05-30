@@ -4,10 +4,17 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"os"
 	"strconv"
 
 	_ "github.com/mattn/go-sqlite3"
 )
+
+type user struct {
+	firstname string
+	lastname  string
+	rollNo    int
+}
 
 func checkErr(err error) {
 	if err != nil {
@@ -15,11 +22,11 @@ func checkErr(err error) {
 	}
 }
 
-func insertUser(db *sql.DB, firstname string, lastname string, rollNo int) {
+func insertUser(db *sql.DB, stu *user) {
 	log.Println("Inserting user record ...")
 	statement, err := db.Prepare("INSERT INTO users(firstname, lastname, rollNo) VALUES(?, ?, ?)")
 	checkErr(err)
-	_, err = statement.Exec(firstname, lastname, rollNo)
+	_, err = statement.Exec(stu.firstname, stu.lastname, stu.rollNo)
 	checkErr(err)
 	log.Println("User added ...")
 }
@@ -37,6 +44,7 @@ func displayUsers(db *sql.DB) {
 }
 
 func createTable(db *sql.DB) {
+	os.Remove("testdata.db")
 	log.Println("Creating users table ...")
 	statement, err := db.Prepare("CREATE TABLE IF NOT EXISTS users (rollNo INTEGER PRIMARY KEY, firstname TEXT, lastname TEXT)")
 	if err != nil {
@@ -47,9 +55,20 @@ func createTable(db *sql.DB) {
 }
 
 func main() {
+	var users = []user{}
+	users = append(users, user{"vaibhav", "goyal", 201075})
+	users = append(users, user{"Nikhil", "Rathore", 200635})
+	users = append(users, user{"Aastha", "Sitpal", 200134})
+	users = append(users, user{"Harshal", "Mehta", 200845})
+	users = append(users, user{"Rose", "Aggarwal", 200983})
+	users = append(users, user{"Rini", "Sahu", 209983})
+
+	fmt.Println(users)
 	database, err := sql.Open("sqlite3", "./testdata.db")
 	checkErr(err)
 	createTable(database)
-	insertUser(database, "vaibhav", "goyal", 201075)
+	for _, stu := range users {
+		insertUser(database, &stu)
+	}
 	displayUsers(database)
 }
