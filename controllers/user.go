@@ -45,7 +45,20 @@ func signupHandler(c *gin.Context) {
 		return
 	}
 
-	err := insertUser(db, &user)
+	if u, _ := models.FetchUserByRollno(db, user.RollNo); u != nil {
+		c.JSON(http.StatusAlreadyReported, "User already exist")
+		return
+	}
+
+	hash, err := models.HashPassword(user.Password)
+	if err != nil {
+		c.JSON(http.StatusUnprocessableEntity, err.Error())
+		return
+	}
+
+	user.Password = hash
+
+	err = insertUser(db, &user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return
@@ -65,10 +78,16 @@ func loginHandler(c *gin.Context) {
 		return
 	}
 
-	err := insertUser(db, &user)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, "Server error")
+	u, _ := models.FetchUserByRollno(db, user.RollNo)
+	if u == nil {
+		c.JSON(http.StatusNotFound, "Please enter correct rollNo and name")
 		return
 	}
-	c.JSON(http.StatusOK, "user successfully added")
+
+	if !models.CheckHashPassword(user.Password, u.Password) {
+		c.JSON(http.StatusNonAuthoritativeInfo, "Please enter correct password")
+		return
+	}
+
+	c.JSON(http.StatusOK, "user found login successful")
 }

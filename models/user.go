@@ -42,7 +42,7 @@ func FetchAllUsers(db *sql.DB) ([]*User, error) {
 func FetchUserByRollno(db *sql.DB, rollNo int) (*User, error) {
 	query := "SELECT rollNo, name, password FROM users WHERE rollNo=?"
 
-	rows, err := fetch(db, query)
+	rows, err := fetch(db, query, rollNo)
 	if err != nil {
 		return nil, err
 	}
