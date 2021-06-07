@@ -89,5 +89,22 @@ func loginHandler(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, "user found login successful")
+	ts, err := createToken(user.RollNo)
+	if err != nil {
+		c.JSON(http.StatusUnprocessableEntity, err.Error())
+		return
+	}
+	tokens := map[string]string{
+		"access_token": ts.AccessToken,
+	}
+	c.JSON(http.StatusOK, tokens)
+}
+
+func secretHandler(c *gin.Context) {
+	err := TokenValid(c.Request)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, "Please login to acces this page")
+		return
+	}
+	c.JSON(http.StatusOK, "You have login that's why you can see this page")
 }
