@@ -7,7 +7,7 @@ type RewardParams struct {
 
 type TransferParams struct {
 	Sender   int `json:"sender_rollNo"`
-	Receiver int `json:"reciever_rollNo"`
+	Receiver int `json:"receiver_rollNo"`
 	Coins    int `json:"coins"`
 }
 
