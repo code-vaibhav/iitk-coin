@@ -9,7 +9,7 @@ import (
 )
 
 func insertUser(db *sql.DB, user *models.User) error {
-	statement, err := db.Prepare("INSERT INTO users(name, rollNo, password) VALUES(?, ?, ?)")
+	statement, err := db.Prepare("INSERT INTO users(name, rollNo, password, coins) VALUES(?, ?, ?, 0)")
 	if err != nil {
 		return err
 	}

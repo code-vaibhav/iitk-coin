@@ -9,6 +9,7 @@ type User struct {
 	Name     string `json:"name"`
 	RollNo   int    `json:"rollNo"`
 	Password string `json:"password"`
+	Coins    int
 }
 
 func fetch(db *sql.DB, query string, args ...interface{}) ([]*User, error) {

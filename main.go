@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"log"
-	"os"
 
 	"github.com/code-vaibhav/iitk-coin/controllers"
 	"github.com/gin-gonic/gin"
@@ -11,9 +10,8 @@ import (
 )
 
 func createTable(db *sql.DB) {
-	os.Remove("testdata.db")
 	log.Println("Creating users table ...")
-	statement, err := db.Prepare("CREATE TABLE IF NOT EXISTS users (rollNo INTEGER PRIMARY KEY, name TEXT, password TEXT)")
+	statement, err := db.Prepare("CREATE TABLE IF NOT EXISTS users (rollNo INTEGER PRIMARY KEY, name TEXT NOT NULL, password TEXT NOT NULL, coins INTEGER NOT NULL)")
 	if err != nil {
 		log.Fatal(err.Error())
 	}
