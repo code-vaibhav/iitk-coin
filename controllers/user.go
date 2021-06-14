@@ -2,36 +2,11 @@ package controllers
 
 import (
 	"database/sql"
-	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/code-vaibhav/iitk-coin/models"
 	"github.com/gin-gonic/gin"
 )
-
-func insertUser(db *sql.DB, user *models.User) error {
-	statement, err := db.Prepare("INSERT INTO users(name, rollNo, password) VALUES(?, ?, ?)")
-	if err != nil {
-		return err
-	}
-	_, err = statement.Exec(user.Name, user.RollNo, user.Password)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func displayUsers(db *sql.DB) {
-	data := new(models.User)
-
-	rows, err := db.Query("SELECT rollNo , firstname, lastname FROM users")
-	CheckErr(err)
-	for rows.Next() {
-		rows.Scan(&data.RollNo, &data.Name, &data.Password)
-		fmt.Println(strconv.Itoa(data.RollNo) + ": " + data.Name)
-	}
-}
 
 func signupHandler(c *gin.Context) {
 	user := models.User{}
@@ -103,8 +78,8 @@ func loginHandler(c *gin.Context) {
 func secretHandler(c *gin.Context) {
 	err := TokenValid(c.Request)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, "Please login to acces this page")
+		c.JSON(http.StatusUnauthorized, "User not authenticated")
 		return
 	}
-	c.JSON(http.StatusOK, "You have login that's why you can see this page")
+	c.JSON(http.StatusOK, "User authenticated")
 }
