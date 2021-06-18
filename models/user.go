@@ -23,7 +23,7 @@ func fetch(db *sql.DB, query string, args ...interface{}) ([]*User, error) {
 
 	for rows.Next() {
 		data := new(User)
-		err := rows.Scan(&data.RollNo, &data.Name, &data.Password)
+		err := rows.Scan(&data.RollNo, &data.Name, &data.Password, &data.Coins)
 		if err != nil {
 			return nil, err
 		}
@@ -35,13 +35,13 @@ func fetch(db *sql.DB, query string, args ...interface{}) ([]*User, error) {
 }
 
 func FetchAllUsers(db *sql.DB) ([]*User, error) {
-	query := ("SELECT rollNo, name, password FROM users")
+	query := ("SELECT rollNo, name, password, coins FROM users")
 
 	return fetch(db, query)
 }
 
 func FetchUserByRollno(db *sql.DB, rollNo int) (*User, error) {
-	query := "SELECT rollNo, name, password FROM users WHERE rollNo=?"
+	query := "SELECT rollNo, name, password, coins FROM users WHERE rollNo=?"
 
 	rows, err := fetch(db, query, rollNo)
 	if err != nil {

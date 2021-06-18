@@ -60,10 +60,10 @@ func transferCoinsHandler(c *gin.Context) {
 		c.JSON(http.StatusNotFound, err.Error())
 	}
 
-	// if sender.Coins < params.Coins {
-	// 	c.JSON(http.StatusBadRequest, "Insufficient balance")
-	// 	return
-	// }
+	if sender.Coins < params.Coins {
+		c.JSON(http.StatusBadRequest, "Insufficient balance")
+		return
+	}
 
 	statusCode, err := tranferCoins(db, sender, reciever, params.Coins)
 	if err != nil {
@@ -91,5 +91,5 @@ func balanceCoinsHandler(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusNotFound, "User not found")
 	}
-	c.JSON(http.StatusOK, user.Coins)
+	c.JSON(http.StatusOK, user)
 }
