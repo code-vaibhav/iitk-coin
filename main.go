@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/code-vaibhav/iitk-coin/controllers"
+	"github.com/code-vaibhav/iitk-coin/sqldb"
 	"github.com/gin-gonic/gin"
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -21,20 +22,10 @@ func createTable(db *sql.DB) {
 
 var router *gin.Engine
 
-func ApiMiddleWare(db *sql.DB) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Set("databaseConn", db)
-		c.Next()
-	}
-}
-
 func main() {
-	db, err := sql.Open("sqlite3", "./testdata.db")
-	controllers.CheckErr(err)
-	createTable(db)
+	sqldb.ConnectDB()
 
 	router = gin.Default()
-	router.Use(ApiMiddleWare(db))
 	controllers.SetUpRoutes(router)
 	router.Run(":8080")
 }

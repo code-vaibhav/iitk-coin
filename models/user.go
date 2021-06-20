@@ -1,8 +1,9 @@
 package models
 
 import (
-	"database/sql"
 	"errors"
+
+	"github.com/code-vaibhav/iitk-coin/sqldb"
 )
 
 type User struct {
@@ -12,8 +13,8 @@ type User struct {
 	Coins    int
 }
 
-func fetch(db *sql.DB, query string, args ...interface{}) ([]*User, error) {
-	rows, err := db.Query(query, args...)
+func fetch(query string, args ...interface{}) ([]*User, error) {
+	rows, err := sqldb.DB.Query(query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -34,16 +35,16 @@ func fetch(db *sql.DB, query string, args ...interface{}) ([]*User, error) {
 	return payload, nil
 }
 
-func FetchAllUsers(db *sql.DB) ([]*User, error) {
-	query := ("SELECT rollNo, name, password, coins FROM users")
+func FetchAllUsers() ([]*User, error) {
+	query := ("SELECT * FROM users")
 
-	return fetch(db, query)
+	return fetch(query)
 }
 
-func FetchUserByRollno(db *sql.DB, rollNo int) (*User, error) {
-	query := "SELECT rollNo, name, password, coins FROM users WHERE rollNo=?"
+func FetchUserByRollno(rollNo int) (*User, error) {
+	query := "SELECT * FROM users WHERE rollNo=?"
 
-	rows, err := fetch(db, query, rollNo)
+	rows, err := fetch(query, rollNo)
 	if err != nil {
 		return nil, err
 	}

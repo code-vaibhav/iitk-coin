@@ -1,25 +1,31 @@
 package controllers
 
 import (
-	"database/sql"
 	"errors"
 	"log"
 	"net/http"
 
-	"github.com/code-vaibhav/iitk-coin/models"
+	"github.com/code-vaibhav/iitk-coin/sqldb"
 )
 
-func rewardCoins(db *sql.DB, user *models.User, coins int) (int, error) {
-	tx, err := db.Begin()
+func rewardCoins(rollNo int, coins int) (int, error) {
+	tx, err := sqldb.DB.Begin()
 	if err != nil {
 		return http.StatusInternalServerError, err
 	}
-	_, execErr := tx.Exec("UPDATE users SET coins=? WHERE rollNo=?", user.Coins+coins, user.RollNo)
-	if execErr != nil {
+	res, execErr := tx.Exec("UPDATE users SET coins = coins + ? WHERE rollNo = ?", coins, rollNo)
+
+	if affect, _ := res.RowsAffected(); affect != 1 || execErr != nil {
 		if rollBackErr := tx.Rollback(); rollBackErr != nil {
 			log.Fatal("Unable to rollback due to error:", rollBackErr.Error())
 		}
-		return http.StatusInternalServerError, err
+		if affect == 0 {
+			return http.StatusBadRequest, errors.New("please provide correct rollNo")
+		}
+		if affect > 1 {
+			return http.StatusBadRequest, errors.New("Your request updated more than one entry")
+		}
+		return http.StatusInternalServerError, execErr
 	}
 
 	if err = tx.Commit(); err != nil {
@@ -28,25 +34,38 @@ func rewardCoins(db *sql.DB, user *models.User, coins int) (int, error) {
 	return http.StatusOK, nil
 }
 
-func tranferCoins(db *sql.DB, sender *models.User, reciever *models.User, coins int) (int, error) {
-	tx, err := db.Begin()
+func tranferCoins(senderRollNo int, recieverRollNo int, coins int) (int, error) {
+	tx, err := sqldb.DB.Begin()
 	if err != nil {
 		return http.StatusInternalServerError, err
 	}
-	_, execErr := tx.Exec("UPDATE users SET coins=? WHERE rollNo=?", sender.Coins-coins, sender.RollNo)
-	if execErr != nil {
+	res, execErr := tx.Exec("UPDATE users SET coins=coins-? WHERE rollNo=? AND coins-?>=0", coins, senderRollNo, coins)
+
+	if affect, _ := res.RowsAffected(); affect != 1 || execErr != nil {
 		if rollBackErr := tx.Rollback(); rollBackErr != nil {
 			log.Fatal("Unable to rollback due to error:", rollBackErr.Error())
 		}
-		return http.StatusInternalServerError, err
+		if affect == 0 {
+			return http.StatusBadRequest, errors.New("please provide correct rollNo or check balance first")
+		}
+		if affect > 1 {
+			return http.StatusBadRequest, errors.New("Your request updated more than one entry")
+		}
+		return http.StatusInternalServerError, execErr
 	}
 
-	_, execErr = tx.Exec("UPDATE users SET coins=? WHERE rollNo=?", reciever.Coins+coins, reciever.RollNo)
-	if execErr != nil {
+	res, execErr = tx.Exec("UPDATE users SET coins=coins+? WHERE rollNo=?", coins, recieverRollNo, coins)
+	if affect, _ := res.RowsAffected(); affect != 1 || execErr != nil {
 		if rollBackErr := tx.Rollback(); rollBackErr != nil {
 			log.Fatal("Unable to rollback due to error:", rollBackErr.Error())
 		}
-		return http.StatusInternalServerError, err
+		if affect == 0 {
+			return http.StatusBadRequest, errors.New("please provide correct rollNo")
+		}
+		if affect > 1 {
+			return http.StatusBadRequest, errors.New("Your request updated more than one entry")
+		}
+		return http.StatusInternalServerError, execErr
 	}
 
 	if err = tx.Commit(); err != nil {

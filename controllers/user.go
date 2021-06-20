@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"database/sql"
 	"net/http"
 
 	"github.com/code-vaibhav/iitk-coin/models"
@@ -14,13 +13,8 @@ func signupHandler(c *gin.Context) {
 		c.JSON(http.StatusUnprocessableEntity, err.Error())
 		return
 	}
-	db, ok := c.MustGet("databaseConn").(*sql.DB)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, "Server error: Cannot get database")
-		return
-	}
 
-	if u, _ := models.FetchUserByRollno(db, user.RollNo); u != nil {
+	if u, _ := models.FetchUserByRollno(user.RollNo); u != nil {
 		c.JSON(http.StatusAlreadyReported, "User already exist")
 		return
 	}
@@ -33,7 +27,7 @@ func signupHandler(c *gin.Context) {
 
 	user.Password = hash
 
-	err = insertUser(db, &user)
+	err = insertUser(&user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return
@@ -47,13 +41,8 @@ func loginHandler(c *gin.Context) {
 		c.JSON(http.StatusUnprocessableEntity, err.Error())
 		return
 	}
-	db, ok := c.MustGet("databaseConn").(*sql.DB)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, "Server error")
-		return
-	}
 
-	u, _ := models.FetchUserByRollno(db, user.RollNo)
+	u, _ := models.FetchUserByRollno(user.RollNo)
 	if u == nil {
 		c.JSON(http.StatusNotFound, "Please enter correct rollNo and name")
 		return
