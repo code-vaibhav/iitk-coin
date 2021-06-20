@@ -13,14 +13,14 @@ func rewardCoins(rollNo int, coins int) (int, error) {
 	if err != nil {
 		return http.StatusInternalServerError, err
 	}
-	res, execErr := tx.Exec("UPDATE users SET coins = coins + ? WHERE rollNo = ?", coins, rollNo)
+	res, execErr := tx.Exec("UPDATE users SET coins = coins + ? WHERE rollNo = ? coins + ? <= 1000", coins, rollNo, coins)
 
 	if affect, _ := res.RowsAffected(); affect != 1 || execErr != nil {
 		if rollBackErr := tx.Rollback(); rollBackErr != nil {
 			log.Fatal("Unable to rollback due to error:", rollBackErr.Error())
 		}
 		if affect == 0 {
-			return http.StatusBadRequest, errors.New("please provide correct rollNo")
+			return http.StatusBadRequest, errors.New("Coins limited exceeded for this user")
 		}
 		if affect > 1 {
 			return http.StatusBadRequest, errors.New("Your request updated more than one entry")
@@ -46,7 +46,7 @@ func tranferCoins(senderRollNo int, recieverRollNo int, coins int) (int, error) 
 			log.Fatal("Unable to rollback due to error:", rollBackErr.Error())
 		}
 		if affect == 0 {
-			return http.StatusBadRequest, errors.New("please provide correct rollNo or check balance first")
+			return http.StatusBadRequest, errors.New("You don't have enough coins to transfer")
 		}
 		if affect > 1 {
 			return http.StatusBadRequest, errors.New("Your request updated more than one entry")
@@ -54,13 +54,13 @@ func tranferCoins(senderRollNo int, recieverRollNo int, coins int) (int, error) 
 		return http.StatusInternalServerError, execErr
 	}
 
-	res, execErr = tx.Exec("UPDATE users SET coins=coins+? WHERE rollNo=?", coins, recieverRollNo, coins)
+	res, execErr = tx.Exec("UPDATE users SET coins=coins+? WHERE rollNo=? coins+? <= 1000", coins, recieverRollNo, coins)
 	if affect, _ := res.RowsAffected(); affect != 1 || execErr != nil {
 		if rollBackErr := tx.Rollback(); rollBackErr != nil {
 			log.Fatal("Unable to rollback due to error:", rollBackErr.Error())
 		}
 		if affect == 0 {
-			return http.StatusBadRequest, errors.New("please provide correct rollNo")
+			return http.StatusBadRequest, errors.New("Coins limit exceeded for reciever. You can't do that transaction.")
 		}
 		if affect > 1 {
 			return http.StatusBadRequest, errors.New("Your request updated more than one entry")

@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/code-vaibhav/iitk-coin/models"
@@ -11,6 +12,12 @@ func rewardCoinsHandler(c *gin.Context) {
 	params := models.RewardParams{}
 	if err := c.ShouldBindJSON(&params); err != nil {
 		c.JSON(http.StatusUnprocessableEntity, err.Error())
+		return
+	}
+
+	_, err := models.FetchUserByRollno(params.RollNo)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -26,6 +33,13 @@ func transferCoinsHandler(c *gin.Context) {
 	params := models.TransferParams{}
 	if err := c.ShouldBindJSON(&params); err != nil {
 		c.JSON(http.StatusUnprocessableEntity, err.Error())
+		return
+	}
+
+	_, errSender := models.FetchUserByRollno(params.Sender)
+	_, errReciever := models.FetchUserByRollno(params.Receiver)
+	if errSender != nil || errReciever != nil {
+		c.JSON(http.StatusBadRequest, errors.New("Please provide correct roll numbers").Error())
 		return
 	}
 
