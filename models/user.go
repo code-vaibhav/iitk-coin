@@ -10,7 +10,13 @@ type User struct {
 	Name     string `json:"name"`
 	RollNo   int    `json:"rollNo"`
 	Password string `json:"password"`
+	IsAdmin  int    `json:"isAdmin"`
 	Coins    int
+}
+
+type LoginParams struct {
+	RollNo   int    `json:"rollNo"`
+	Password string `json:"password"`
 }
 
 func fetch(query string, args ...interface{}) ([]*User, error) {
@@ -24,7 +30,7 @@ func fetch(query string, args ...interface{}) ([]*User, error) {
 
 	for rows.Next() {
 		data := new(User)
-		err := rows.Scan(&data.RollNo, &data.Name, &data.Password, &data.Coins)
+		err := rows.Scan(&data.RollNo, &data.Name, &data.Password, &data.Coins, &data.IsAdmin)
 		if err != nil {
 			return nil, err
 		}

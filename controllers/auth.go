@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -71,7 +72,7 @@ func TokenValid(r *http.Request) error {
 		return err
 	}
 	if _, ok := token.Claims.(jwt.Claims); !ok && !token.Valid {
-		return err
+		return errors.New("Token expired please login again.")
 	}
 	return nil
 }

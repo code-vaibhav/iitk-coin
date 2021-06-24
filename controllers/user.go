@@ -36,7 +36,7 @@ func signupHandler(c *gin.Context) {
 }
 
 func loginHandler(c *gin.Context) {
-	user := models.User{}
+	user := models.LoginParams{}
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusUnprocessableEntity, err.Error())
 		return
@@ -65,10 +65,5 @@ func loginHandler(c *gin.Context) {
 }
 
 func secretHandler(c *gin.Context) {
-	err := TokenValid(c.Request)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, "User not authenticated")
-		return
-	}
 	c.JSON(http.StatusOK, "User authenticated")
 }

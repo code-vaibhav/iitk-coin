@@ -11,11 +11,11 @@ import (
 )
 
 func insertUser(user *models.User) error {
-	statement, err := sqldb.DB.Prepare("INSERT INTO users(name, rollNo, password, coins) VALUES(?, ?, ?, 0)")
+	statement, err := sqldb.DB.Prepare("INSERT INTO users(name, rollNo, password, isAdmin, coins) VALUES(?, ?, ?, ?, 0)")
 	if err != nil {
 		return err
 	}
-	_, err = statement.Exec(user.Name, user.RollNo, user.Password)
+	_, err = statement.Exec(user.Name, user.RollNo, user.Password, user.IsAdmin)
 	if err != nil {
 		return err
 	}

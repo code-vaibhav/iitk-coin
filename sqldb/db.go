@@ -25,7 +25,16 @@ func ConnectDB() {
 
 func createTable() {
 	log.Println("Creating users table ...")
-	statement, err := DB.Prepare("CREATE TABLE IF NOT EXISTS users (rollNo INTEGER PRIMARY KEY, name TEXT NOT NULL, password TEXT NOT NULL, coins INTEGER NOT NULL)")
+
+	schema := `CREATE TABLE IF NOT EXISTS users (
+		rollNo INTEGER PRIMARY KEY,
+		name TEXT NOT NULL,
+		password TEXT NOT NULL,
+		coins TEXT NOT NULL,
+		isAdmin INTEGER NOT NULL
+	);`
+
+	statement, err := DB.Prepare(schema)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
