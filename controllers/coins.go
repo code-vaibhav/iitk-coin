@@ -15,9 +15,14 @@ func rewardCoinsHandler(c *gin.Context) {
 		return
 	}
 
-	_, err := models.FetchUserByRollno(params.RollNo)
+	user, err := models.FetchUserByRollno(params.RollNo)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if statusCode, err := validate_reciever(*user); err != nil {
+		c.JSON(statusCode, err.Error())
 		return
 	}
 
@@ -36,10 +41,19 @@ func transferCoinsHandler(c *gin.Context) {
 		return
 	}
 
-	_, errSender := models.FetchUserByRollno(params.Sender)
-	_, errReciever := models.FetchUserByRollno(params.Receiver)
+	sender, errSender := models.FetchUserByRollno(params.Sender)
+	reciever, errReciever := models.FetchUserByRollno(params.Receiver)
 	if errSender != nil || errReciever != nil {
 		c.JSON(http.StatusBadRequest, errors.New("Please provide correct roll numbers").Error())
+		return
+	}
+
+	if statusCode, err := validate_sender(*sender); err != nil {
+		c.JSON(statusCode, err.Error())
+		return
+	}
+	if statusCode, err := validate_reciever(*reciever); err != nil {
+		c.JSON(statusCode, err.Error())
 		return
 	}
 

@@ -40,4 +40,19 @@ func createTable() {
 	}
 	statement.Exec()
 	log.Println("Users table created")
+
+	log.Println("Creating history table ...")
+
+	schema = `CREATE TABLE IF NOT EXISTS transactions (
+		sender INTEGER REFERENCES users(rollNo),
+		reciever INTEGET NOT NULL REFERENCES users(rollNo),
+		amount INTEGER NOT NULL
+	);`
+
+	statement, err = DB.Prepare(schema)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	statement.Exec()
+	log.Println("Users table created")
 }
