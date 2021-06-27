@@ -30,7 +30,7 @@ func validate_sender(user models.User) (int, error) {
 		}
 	}
 
-	if count >= 8 {
+	if count <= 8 {
 		return http.StatusBadRequest, errors.New("Sorry you can't send money to others.")
 	}
 	return http.StatusOK, nil

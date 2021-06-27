@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/code-vaibhav/iitk-coin/sqldb"
 )
@@ -28,7 +29,7 @@ func rewardCoins(rollNo int, coins int) (int, error) {
 		return http.StatusInternalServerError, execErr
 	}
 
-	res, execErr = tx.Exec("INSERT INTO transactions (reciever, amount) VALUES(?, ?)", rollNo, coins)
+	res, execErr = tx.Exec("INSERT INTO transactions (reciever, amount, made_at) VALUES(?, ?, ?)", rollNo, coins, time.Now().Unix())
 	if execErr != nil {
 		if rollBackErr := tx.Rollback(); rollBackErr != nil {
 			log.Fatal("Unable to rollback due to error:", rollBackErr.Error())
@@ -77,7 +78,7 @@ func tranferCoins(senderRollNo int, recieverRollNo int, coins int) (int, error) 
 		return http.StatusInternalServerError, execErr
 	}
 
-	res, execErr = tx.Exec("INSERT INTO transactions (sender, reciever, amount) VALUES(?, ?, ?)", senderRollNo, recieverRollNo, coins)
+	res, execErr = tx.Exec("INSERT INTO transactions (sender, reciever, amount, made_at) VALUES(?, ?, ?, ?)", senderRollNo, recieverRollNo, coins, time.Now().Unix())
 	if execErr != nil {
 		if rollBackErr := tx.Rollback(); rollBackErr != nil {
 			log.Fatal("Unable to rollback due to error:", rollBackErr.Error())

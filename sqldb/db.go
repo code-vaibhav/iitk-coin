@@ -46,7 +46,8 @@ func createTable() {
 	schema = `CREATE TABLE IF NOT EXISTS transactions (
 		sender INTEGER REFERENCES users(rollNo),
 		reciever INTEGET NOT NULL REFERENCES users(rollNo),
-		amount INTEGER NOT NULL
+		amount INTEGER NOT NULL,
+		made_at INTEGER NOT NULL
 	);`
 
 	statement, err = DB.Prepare(schema)
