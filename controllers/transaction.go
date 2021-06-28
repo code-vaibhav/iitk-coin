@@ -64,7 +64,7 @@ func tranferCoins(senderRollNo int, recieverRollNo int, coins int) (int, error) 
 		return http.StatusInternalServerError, execErr
 	}
 
-	res, execErr = tx.Exec("UPDATE users SET coins=coins+? WHERE rollNo=? AND coins+? <= 1000", coins, recieverRollNo, coins)
+	res, execErr = tx.Exec("UPDATE users SET coins=coins+? WHERE rollNo=? AND coins+? <= 1000", calcAmount(senderRollNo, recieverRollNo, coins), recieverRollNo, calcAmount(senderRollNo, recieverRollNo, coins))
 	if affect, _ := res.RowsAffected(); affect != 1 || execErr != nil {
 		if rollBackErr := tx.Rollback(); rollBackErr != nil {
 			log.Fatal("Unable to rollback due to error:", rollBackErr.Error())
