@@ -78,3 +78,23 @@ func balanceCoinsHandler(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, user.Coins)
 }
+
+func redeemCoinsHandler(c *gin.Context) {
+	params := models.BalanceParams{}
+	if err := c.ShouldBindJSON(&params); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, err.Error())
+		return
+	}
+
+	user, err := models.FetchUserByRollno(params.RollNo)
+	if err != nil {
+		c.JSON(http.StatusNotFound, "User not found")
+	}
+
+	statusCode, err := redeemCoins(user.RollNo, user.Coins)
+	if err != nil {
+		c.JSON(statusCode, err.Error())
+		return
+	}
+	c.JSON(statusCode, "Coins reddem successfull")
+}

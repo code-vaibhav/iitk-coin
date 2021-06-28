@@ -29,12 +29,11 @@ func rewardCoins(rollNo int, coins int) (int, error) {
 		return http.StatusInternalServerError, execErr
 	}
 
-	res, execErr = tx.Exec("INSERT INTO transactions (reciever, amount, madeAt, type) VALUES(?, ?, ?, ?)", rollNo, coins, time.Now().Unix(), "Reward")
+	_, execErr = tx.Exec("INSERT INTO transactions (reciever, amount, madeAt, type) VALUES(?, ?, ?, ?)", rollNo, coins, time.Now().Unix(), "Reward")
 	if execErr != nil {
 		if rollBackErr := tx.Rollback(); rollBackErr != nil {
 			log.Fatal("Unable to rollback due to error:", rollBackErr.Error())
 		}
-
 		return http.StatusInternalServerError, execErr
 	}
 
@@ -78,17 +77,41 @@ func tranferCoins(senderRollNo int, recieverRollNo int, coins int) (int, error) 
 		return http.StatusInternalServerError, execErr
 	}
 
-	res, execErr = tx.Exec("INSERT INTO transactions (sender, reciever, amount, madeAt, type) VALUES(?, ?, ?, ?, ?)", senderRollNo, recieverRollNo, coins, time.Now().Unix(), "Transfer")
+	_, execErr = tx.Exec("INSERT INTO transactions (sender, reciever, amount, madeAt, type) VALUES(?, ?, ?, ?, ?)", senderRollNo, recieverRollNo, coins, time.Now().Unix(), "Transfer")
 	if execErr != nil {
 		if rollBackErr := tx.Rollback(); rollBackErr != nil {
 			log.Fatal("Unable to rollback due to error:", rollBackErr.Error())
 		}
-
 		return http.StatusInternalServerError, execErr
 	}
 
 	if err = tx.Commit(); err != nil {
 		return http.StatusInternalServerError, errors.New("Cannot commit the transaction")
 	}
+	return http.StatusOK, nil
+}
+
+func redeemCoins(rollNo int, coins int) (int, error) {
+	tx, err := sqldb.DB.Begin()
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
+
+	_, execErr := tx.Exec("UPDATE users SET coins = 0 WHERE rollNo = ?", rollNo)
+	if execErr != nil {
+		if rollBackErr := tx.Rollback(); rollBackErr != nil {
+			log.Fatal("Unable to rollback due to error:", rollBackErr.Error())
+		}
+		return http.StatusInternalServerError, execErr
+	}
+
+	_, execErr = tx.Exec("INSERT INTO transactions (reciever, amount, madeAt, type) VALUES(?, ?, ?, ?)", rollNo, coins, time.Now().Unix(), "Redeem")
+	if execErr != nil {
+		if rollBackErr := tx.Rollback(); rollBackErr != nil {
+			log.Fatal("Unable to rollback due to error:", rollBackErr.Error())
+		}
+		return http.StatusInternalServerError, execErr
+	}
+
 	return http.StatusOK, nil
 }
