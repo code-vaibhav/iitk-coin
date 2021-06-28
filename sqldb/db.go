@@ -31,7 +31,8 @@ func createTable() {
 		name TEXT NOT NULL,
 		password TEXT NOT NULL,
 		coins TEXT NOT NULL,
-		isAdmin INTEGER NOT NULL
+		isAdmin INTEGER NOT NULL,
+		isFreezed INTEGER NOT NULL
 	);`
 
 	statement, err := DB.Prepare(schema)
@@ -47,7 +48,8 @@ func createTable() {
 		sender INTEGER REFERENCES users(rollNo),
 		reciever INTEGET NOT NULL REFERENCES users(rollNo),
 		amount INTEGER NOT NULL,
-		made_at INTEGER NOT NULL
+		type TEXT NOT NULL,
+		madeAt INTEGER NOT NULL
 	);`
 
 	statement, err = DB.Prepare(schema)

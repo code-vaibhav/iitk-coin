@@ -29,7 +29,7 @@ func signupHandler(c *gin.Context) {
 
 	err = insertUser(&user)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusBadRequest, err.Error())
 		return
 	}
 	c.JSON(http.StatusOK, "user successfully added")

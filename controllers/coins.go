@@ -21,7 +21,7 @@ func rewardCoinsHandler(c *gin.Context) {
 		return
 	}
 
-	if statusCode, err := validate_reciever(*user); err != nil {
+	if statusCode, err := validate_reward_reciever(*user); err != nil {
 		c.JSON(statusCode, err.Error())
 		return
 	}
@@ -52,7 +52,7 @@ func transferCoinsHandler(c *gin.Context) {
 		c.JSON(statusCode, err.Error())
 		return
 	}
-	if statusCode, err := validate_reciever(*reciever); err != nil {
+	if statusCode, err := validate_reciever(*reciever, *sender); err != nil {
 		c.JSON(statusCode, err.Error())
 		return
 	}
