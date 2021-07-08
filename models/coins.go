@@ -14,3 +14,8 @@ type TransferParams struct {
 type BalanceParams struct {
 	RollNo int `json:"rollNo"`
 }
+
+type RedeemParams struct {
+	RollNo   int `json:"rollNo"`
+	ItemCode int `json:"itemCode"`
+}

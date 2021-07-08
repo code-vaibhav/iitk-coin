@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/code-vaibhav/iitk-coin/models"
 	"github.com/code-vaibhav/iitk-coin/sqldb"
 )
 
@@ -21,10 +22,10 @@ func rewardCoins(rollNo int, coins int) (int, error) {
 			log.Fatal("Unable to rollback due to error:", rollBackErr.Error())
 		}
 		if affect == 0 {
-			return http.StatusBadRequest, errors.New("Coins limited exceeded for this user")
+			return http.StatusBadRequest, errors.New("coins limited exceeded for this user")
 		}
 		if affect > 1 {
-			return http.StatusBadRequest, errors.New("Your request updated more than one entry")
+			return http.StatusBadRequest, errors.New("your request updated more than one entry")
 		}
 		return http.StatusInternalServerError, execErr
 	}
@@ -38,7 +39,7 @@ func rewardCoins(rollNo int, coins int) (int, error) {
 	}
 
 	if err = tx.Commit(); err != nil {
-		return http.StatusInternalServerError, errors.New("Cannot commit the transaction")
+		return http.StatusInternalServerError, errors.New("cannot commit the transaction")
 	}
 	return http.StatusOK, nil
 }
@@ -55,10 +56,10 @@ func tranferCoins(senderRollNo int, recieverRollNo int, coins int) (int, error) 
 			log.Fatal("Unable to rollback due to error:", rollBackErr.Error())
 		}
 		if affect == 0 {
-			return http.StatusBadRequest, errors.New("You don't have enough coins to transfer")
+			return http.StatusBadRequest, errors.New("you don't have enough coins to transfer")
 		}
 		if affect > 1 {
-			return http.StatusBadRequest, errors.New("Your request updated more than one entry")
+			return http.StatusBadRequest, errors.New("your request updated more than one entry")
 		}
 		return http.StatusInternalServerError, execErr
 	}
@@ -69,10 +70,10 @@ func tranferCoins(senderRollNo int, recieverRollNo int, coins int) (int, error) 
 			log.Fatal("Unable to rollback due to error:", rollBackErr.Error())
 		}
 		if affect == 0 {
-			return http.StatusBadRequest, errors.New("Coins limit exceeded for reciever. You can't do that transaction.")
+			return http.StatusBadRequest, errors.New("coins limit exceeded for reciever. You can't do that transaction")
 		}
 		if affect > 1 {
-			return http.StatusBadRequest, errors.New("Your request updated more than one entry")
+			return http.StatusBadRequest, errors.New("your request updated more than one entry")
 		}
 		return http.StatusInternalServerError, execErr
 	}
@@ -86,18 +87,18 @@ func tranferCoins(senderRollNo int, recieverRollNo int, coins int) (int, error) 
 	}
 
 	if err = tx.Commit(); err != nil {
-		return http.StatusInternalServerError, errors.New("Cannot commit the transaction")
+		return http.StatusInternalServerError, errors.New("cannot commit the transaction")
 	}
 	return http.StatusOK, nil
 }
 
-func redeemCoins(rollNo int, coins int) (int, error) {
+func redeemCoins(rollNo int, item *models.Item) (int, error) {
 	tx, err := sqldb.DB.Begin()
 	if err != nil {
 		return http.StatusInternalServerError, err
 	}
 
-	_, execErr := tx.Exec("UPDATE users SET coins = 0 WHERE rollNo = ?", rollNo)
+	_, execErr := tx.Exec("INSERT INTO redeem_requests (user, itemCode, status) VALUES(?, ?, ?)", rollNo, item.Code, "pending")
 	if execErr != nil {
 		if rollBackErr := tx.Rollback(); rollBackErr != nil {
 			log.Fatal("Unable to rollback due to error:", rollBackErr.Error())
@@ -105,7 +106,7 @@ func redeemCoins(rollNo int, coins int) (int, error) {
 		return http.StatusInternalServerError, execErr
 	}
 
-	_, execErr = tx.Exec("INSERT INTO transactions (reciever, amount, madeAt, type) VALUES(?, ?, ?, ?)", rollNo, coins, time.Now().Unix(), "Redeem")
+	_, execErr = tx.Exec("INSERT INTO transactions (reciever, amount, madeAt, type) VALUES(?, ?, ?, ?)", rollNo, item.Amount, time.Now().Unix(), "Redeem")
 	if execErr != nil {
 		if rollBackErr := tx.Rollback(); rollBackErr != nil {
 			log.Fatal("Unable to rollback due to error:", rollBackErr.Error())
@@ -113,5 +114,8 @@ func redeemCoins(rollNo int, coins int) (int, error) {
 		return http.StatusInternalServerError, execErr
 	}
 
+	if err = tx.Commit(); err != nil {
+		return http.StatusInternalServerError, errors.New("cannot commit the transaction")
+	}
 	return http.StatusOK, nil
 }

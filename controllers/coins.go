@@ -44,7 +44,7 @@ func transferCoinsHandler(c *gin.Context) {
 	sender, errSender := models.FetchUserByRollno(params.Sender)
 	reciever, errReciever := models.FetchUserByRollno(params.Receiver)
 	if errSender != nil || errReciever != nil {
-		c.JSON(http.StatusBadRequest, errors.New("Please provide correct roll numbers").Error())
+		c.JSON(http.StatusBadRequest, errors.New("please provide correct roll numbers").Error())
 		return
 	}
 
@@ -80,7 +80,7 @@ func balanceCoinsHandler(c *gin.Context) {
 }
 
 func redeemCoinsHandler(c *gin.Context) {
-	params := models.BalanceParams{}
+	params := models.RedeemParams{}
 	if err := c.ShouldBindJSON(&params); err != nil {
 		c.JSON(http.StatusUnprocessableEntity, err.Error())
 		return
@@ -89,12 +89,27 @@ func redeemCoinsHandler(c *gin.Context) {
 	user, err := models.FetchUserByRollno(params.RollNo)
 	if err != nil {
 		c.JSON(http.StatusNotFound, "User not found")
+		return
 	}
 
-	statusCode, err := redeemCoins(user.RollNo, user.Coins)
+	item, err := models.FetchItem(params.ItemCode)
+	if err != nil {
+		c.JSON(http.StatusNotFound, err.Error())
+		return
+	}
+	if item.IsAvailable == 0 {
+		c.JSON(http.StatusBadRequest, errors.New("item is not availbale at the moment please try woth a different item or try again later"))
+	}
+
+	if user.Coins <= item.Amount {
+		c.JSON(http.StatusBadRequest, "You don't have sufficient coins to redeem items please select another item")
+		return
+	}
+
+	statusCode, err := redeemCoins(user.RollNo, item)
 	if err != nil {
 		c.JSON(statusCode, err.Error())
 		return
 	}
-	c.JSON(statusCode, "Coins reddem successfull")
+	c.JSON(statusCode, "Your request is pending for admin approval")
 }

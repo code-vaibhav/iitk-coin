@@ -8,4 +8,6 @@ func SetUpRoutes(r *gin.Engine) {
 	r.POST("/coins/reward", rewardCoinsHandler)
 	r.POST("/coins/send", ProvideAuth(), transferCoinsHandler)
 	r.POST("/coins/balance", ProvideAuth(), balanceCoinsHandler)
+	r.POST("/coins/redeem", redeemCoinsHandler)
+	r.GET("/items", showItemHandler)
 }

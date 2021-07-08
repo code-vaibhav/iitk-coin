@@ -24,6 +24,7 @@ func ConnectDB() {
 }
 
 func createTable() {
+	//users table
 	log.Println("Creating users table ...")
 
 	schema := `CREATE TABLE IF NOT EXISTS users (
@@ -42,7 +43,8 @@ func createTable() {
 	statement.Exec()
 	log.Println("Users table created")
 
-	log.Println("Creating history table ...")
+	//transactions table
+	log.Println("Creating transactions table ...")
 
 	schema = `CREATE TABLE IF NOT EXISTS transactions (
 		sender INTEGER REFERENCES users(rollNo),
@@ -50,6 +52,39 @@ func createTable() {
 		amount INTEGER NOT NULL,
 		type TEXT NOT NULL,
 		madeAt INTEGER NOT NULL
+	);`
+
+	statement, err = DB.Prepare(schema)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	statement.Exec()
+	log.Println("transactions table created")
+
+	//items table
+	log.Println("Creating transactions table ...")
+
+	schema = `CREATE TABLE IF NOT EXISTS items (
+		code INTEGER PRIMARY KEY,
+		amount INTEGER NOT NULL,
+		name TEXT NOT NULL,
+		isAvailable INTEGER NOT NULL
+	)`
+
+	statement, err = DB.Prepare(schema)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	statement.Exec()
+	log.Println("Users table created")
+
+	// redeem_requests table
+	log.Println("Creating redeem_requests table ...")
+
+	schema = `CREATE TABLE IF NOT EXISTS redeem_requests (
+		user INTEGER NOT NULL REFERENCES users(rollNo),
+		itemCode INTEGER NOT NULL REFERENCES items(code),
+		status TEXT NOT NULL
 	);`
 
 	statement, err = DB.Prepare(schema)
