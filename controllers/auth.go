@@ -66,13 +66,16 @@ func verifyToken(r *http.Request) (*jwt.Token, error) {
 	return token, nil
 }
 
-func TokenValid(r *http.Request) error {
+func TokenValid(r *http.Request) (int, error) {
 	token, err := verifyToken(r)
 	if err != nil {
-		return err
+		return 0, err
 	}
-	if _, ok := token.Claims.(jwt.Claims); !ok && !token.Valid {
-		return errors.New("Token expired please login again.")
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok || !token.Valid {
+		return 0, errors.New("token expired please login again")
 	}
-	return nil
+
+	return int(claims["roll_no"].(float64)), nil
 }

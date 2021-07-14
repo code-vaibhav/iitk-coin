@@ -62,3 +62,12 @@ func FetchUserByRollno(rollNo int) (*User, error) {
 		return nil, errors.New("User not found in database")
 	}
 }
+
+func IsAdmin(rollNo int) (bool, error) {
+	user, err := FetchUserByRollno(rollNo)
+	if err != nil {
+		return false, err
+	}
+
+	return user.IsAdmin != 0, nil
+}

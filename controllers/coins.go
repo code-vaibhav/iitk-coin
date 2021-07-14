@@ -9,7 +9,7 @@ import (
 )
 
 func rewardCoinsHandler(c *gin.Context) {
-	params := models.RewardParams{}
+	params := models.CoinParams{}
 	if err := c.ShouldBindJSON(&params); err != nil {
 		c.JSON(http.StatusUnprocessableEntity, err.Error())
 		return
@@ -35,14 +35,16 @@ func rewardCoinsHandler(c *gin.Context) {
 }
 
 func transferCoinsHandler(c *gin.Context) {
-	params := models.TransferParams{}
+	params := models.CoinParams{}
 	if err := c.ShouldBindJSON(&params); err != nil {
 		c.JSON(http.StatusUnprocessableEntity, err.Error())
 		return
 	}
 
-	sender, errSender := models.FetchUserByRollno(params.Sender)
-	reciever, errReciever := models.FetchUserByRollno(params.Receiver)
+	senderRollNo := c.MustGet("rollNo").(int)
+
+	sender, errSender := models.FetchUserByRollno(senderRollNo)
+	reciever, errReciever := models.FetchUserByRollno(params.RollNo)
 	if errSender != nil || errReciever != nil {
 		c.JSON(http.StatusBadRequest, errors.New("please provide correct roll numbers").Error())
 		return
@@ -57,7 +59,7 @@ func transferCoinsHandler(c *gin.Context) {
 		return
 	}
 
-	statusCode, err := tranferCoins(params.Sender, params.Receiver, params.Coins)
+	statusCode, err := tranferCoins(senderRollNo, params.RollNo, params.Coins)
 	if err != nil {
 		c.JSON(statusCode, err.Error())
 		return
@@ -66,13 +68,9 @@ func transferCoinsHandler(c *gin.Context) {
 }
 
 func balanceCoinsHandler(c *gin.Context) {
-	params := models.BalanceParams{}
-	if err := c.ShouldBindJSON(&params); err != nil {
-		c.JSON(http.StatusUnprocessableEntity, err.Error())
-		return
-	}
+	rollNo := c.MustGet("rollNo").(int)
 
-	user, err := models.FetchUserByRollno(params.RollNo)
+	user, err := models.FetchUserByRollno(rollNo)
 	if err != nil {
 		c.JSON(http.StatusNotFound, "User not found")
 	}
@@ -86,7 +84,9 @@ func redeemCoinsHandler(c *gin.Context) {
 		return
 	}
 
-	user, err := models.FetchUserByRollno(params.RollNo)
+	rollNo := c.MustGet("rollNo").(int)
+
+	user, err := models.FetchUserByRollno(rollNo)
 	if err != nil {
 		c.JSON(http.StatusNotFound, "User not found")
 		return
@@ -101,7 +101,7 @@ func redeemCoinsHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, errors.New("item is not availbale at the moment please try woth a different item or try again later"))
 	}
 
-	if user.Coins <= item.Amount {
+	if user.Coins < item.Amount {
 		c.JSON(http.StatusBadRequest, "You don't have sufficient coins to redeem items please select another item")
 		return
 	}

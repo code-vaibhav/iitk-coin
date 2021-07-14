@@ -47,6 +47,7 @@ func createTable() {
 	log.Println("Creating transactions table ...")
 
 	schema = `CREATE TABLE IF NOT EXISTS transactions (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		sender INTEGER REFERENCES users(rollNo),
 		reciever INTEGET NOT NULL REFERENCES users(rollNo),
 		amount INTEGER NOT NULL,
@@ -62,10 +63,10 @@ func createTable() {
 	log.Println("transactions table created")
 
 	//items table
-	log.Println("Creating transactions table ...")
+	log.Println("Creating items table ...")
 
 	schema = `CREATE TABLE IF NOT EXISTS items (
-		code INTEGER PRIMARY KEY,
+		code INTEGER PRIMARY KEY AUTOINCREMENT,
 		amount INTEGER NOT NULL,
 		name TEXT NOT NULL,
 		isAvailable INTEGER NOT NULL
@@ -76,15 +77,17 @@ func createTable() {
 		log.Fatal(err.Error())
 	}
 	statement.Exec()
-	log.Println("Users table created")
+	log.Println("Items table created")
 
 	// redeem_requests table
 	log.Println("Creating redeem_requests table ...")
 
 	schema = `CREATE TABLE IF NOT EXISTS redeem_requests (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		user INTEGER NOT NULL REFERENCES users(rollNo),
 		itemCode INTEGER NOT NULL REFERENCES items(code),
-		status TEXT NOT NULL
+		status TEXT NOT NULL,
+		madeAt TEXT NOT NULL
 	);`
 
 	statement, err = DB.Prepare(schema)
@@ -92,5 +95,5 @@ func createTable() {
 		log.Fatal(err.Error())
 	}
 	statement.Exec()
-	log.Println("Users table created")
+	log.Println("Redeem requests table created")
 }
