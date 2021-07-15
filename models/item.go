@@ -7,10 +7,10 @@ import (
 )
 
 type Item struct {
-	Code        int
-	Amount      int
-	Name        string
-	IsAvailable int
+	Code        int    `json:"code"`
+	Amount      int    `json:"amount"`
+	Name        string `json:"name"`
+	IsAvailable int    `json:"isAvailable"`
 }
 
 func fetchItems(query string, args ...interface{}) ([]*Item, error) {

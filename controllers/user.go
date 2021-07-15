@@ -63,3 +63,7 @@ func loginHandler(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, tokens)
 }
+
+func logoutHandler(c *gin.Context) {
+
+}
