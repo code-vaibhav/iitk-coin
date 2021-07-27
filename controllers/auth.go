@@ -3,7 +3,6 @@ package controllers
 import (
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -11,7 +10,6 @@ import (
 
 	"github.com/code-vaibhav/iitk-coin/models"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/joho/godotenv"
 	"github.com/twinj/uuid"
 )
 
@@ -20,17 +18,14 @@ func createToken(rollNo int) (*models.TokenDetails, error) {
 	td.AtExpires = time.Now().Add(time.Minute * 15).Unix()
 	td.AccessUuid = uuid.NewV4().String()
 
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatal("error loading env file")
-	}
-
 	// creating access token
 	atClaims := jwt.MapClaims{}
 	atClaims["authorized"] = true
 	atClaims["roll_no"] = rollNo
 	atClaims["access_uuid"] = td.AccessUuid
 	atClaims["exp"] = td.AtExpires
+
+	var err error
 
 	at := jwt.NewWithClaims(jwt.SigningMethodHS256, atClaims)
 	td.AccessToken, err = at.SignedString([]byte(os.Getenv("ACCESS_SECRET")))

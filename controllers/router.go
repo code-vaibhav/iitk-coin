@@ -20,4 +20,7 @@ func SetUpRoutes(r *gin.Engine) {
 
 	r.GET("/redeemRequests", ProvideAdminAuth(), showRequestsHandler)
 	r.POST("/redeemRequests", ProvideAdminAuth(), changeStatusHandler)
+
+	r.GET("/otp", ProvideAuth(), makeOtpHandler)
+	r.POST("/otp", ProvideAuth(), compareOtpHandler)
 }

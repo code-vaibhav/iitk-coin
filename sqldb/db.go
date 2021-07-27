@@ -16,7 +16,7 @@ func checkErr(err error) {
 var DB *sql.DB
 
 func ConnectDB() {
-	db, err := sql.Open("sqlite3", "./testdata.db")
+	db, err := sql.Open("sqlite3", "./database.db")
 	checkErr(err)
 
 	DB = db
@@ -96,4 +96,19 @@ func createTable() {
 	}
 	statement.Exec()
 	log.Println("Redeem requests table created")
+
+	log.Println("Creating otp table ...")
+
+	schema = `CREATE TABLE IF NOT EXISTS otps (
+		otp INTEGER NOT NULL,
+		user INTEGER NOT NULL REFERENCES users(rollNo) PRIMARY KEY,
+		madeAt TEXT NOT NULL
+	);`
+
+	statement, err = DB.Prepare(schema)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	statement.Exec()
+	log.Println("Otp table created")
 }
